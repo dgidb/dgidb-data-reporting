@@ -1,12 +1,11 @@
 """Provide CLI for application."""
 
-import logging
+from pathlib import Path
 
 import click
 
 from dgidb_analytics import __version__
-from dgidb_analytics.config import get_config
-from dgidb_analytics.logging import initialize_logs
+from dgidb_analytics.snapshot import create_analytics_snapshot
 
 
 @click.group()
@@ -21,5 +20,24 @@ def cli() -> None:
 
     Conclude by summarizing additional commands
     """  # noqa: D301
-    log_level = logging.DEBUG if get_config().debug else logging.INFO
-    initialize_logs(log_level)
+
+
+@cli.command()
+@click.argument(
+    "analytics_db_path",
+    type=click.Path(
+        path_type=Path,
+        dir_okay=False,
+        file_okay=True,
+        exists=False,
+    ),
+)
+@click.argument("postgres_dsn")
+@click.argument("snapshot_name", type=str | None)
+def ingest(
+    analytics_db_path: Path, postgres_dsn: str, snapshot_name: str | None
+) -> None:
+    """Ingest DGIdb snapshot into tracking database"""
+    if not snapshot_name:
+        snapshot_name = postgres_dsn.rsplit("/", 1)[0]
+    create_analytics_snapshot(analytics_db_path, postgres_dsn, snapshot_name)
