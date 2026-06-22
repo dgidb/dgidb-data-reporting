@@ -8,6 +8,13 @@ class SnapshotStatus(StrEnum):
     RELEASED = "released"
 
 
+class SnapshotMetadata(BaseModel):
+    id: int | None = None
+    name: str
+    status: SnapshotStatus
+    notes: str | None = None
+
+
 class SourceMetric(StrEnum):
     DRUG_CLAIMS = "drug_claims"
     DRUG_CLAIM_ALIASES = "drug_claim_aliases"

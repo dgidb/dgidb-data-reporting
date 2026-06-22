@@ -1,6 +1,6 @@
 """Create data entries for a DGIdb snapshot."""
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 import psycopg
 
@@ -8,11 +8,13 @@ from dgidb_analytics.db import (
     add_snapshot_global_count,
     add_snapshot_source_count,
     connect,
+    create_schema,
     create_snapshot,
 )
 from dgidb_analytics.schema import (
     GlobalMetric,
     GlobalMetricCount,
+    SnapshotMetadata,
     SnapshotStatus,
     SourceMetric,
     SourceMetricCount,
@@ -108,11 +110,10 @@ def create_analytics_snapshot(
 ) -> int:
     """Collect analytics from Postgres and save them as a new snapshot."""
     with connect(analytics_db_path) as analytics_conn:
+        create_schema(analytics_conn)
         snapshot_id = create_snapshot(
             analytics_conn,
-            name=snapshot_name,
-            status=snapshot_status,
-            notes=notes,
+            SnapshotMetadata(name=snapshot_name, status=snapshot_status, notes=notes),
         )
 
         with psycopg.connect(postgres_dsn) as pg_conn:
