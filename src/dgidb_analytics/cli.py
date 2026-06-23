@@ -121,6 +121,9 @@ def delete_snapshot(analytics_db_path: Path, snapshot_name: str) -> None:
 @click.option("--show-unchanged", is_flag=True)
 def report(analytics_db_path: Path, snapshot_name: str, show_unchanged: bool) -> None:
     """Run a report on a provisional snapshot against the most recent release snapshot."""
+    with connect(analytics_db_path) as conn:
+        previous_snapshot = db.get_latest_released_snapshot(conn)
+    click.echo(f"Latest release snapshot: {previous_snapshot.name}")
     comparisons = check_provisional_snapshot(analytics_db_path, snapshot_name)
 
     rows = []

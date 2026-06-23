@@ -1,5 +1,5 @@
+from datetime import datetime  # noqa: D100, TC003
 from enum import StrEnum
-from datetime import datetime
 
 from pydantic import BaseModel
 
