@@ -1,15 +1,21 @@
-from datetime import datetime  # noqa: D100, TC003
+"""Data models for analytics snapshots and metrics."""
+
+from datetime import datetime  # noqa: TC003
 from enum import StrEnum
 
 from pydantic import BaseModel
 
 
 class SnapshotStatus(StrEnum):
+    """Lifecycle status of a snapshot."""
+
     PROVISIONAL = "provisional"
     RELEASED = "released"
 
 
 class SnapshotMetadata(BaseModel):
+    """Metadata describing a snapshot."""
+
     id: int | None = None
     name: str
     created_at: datetime | None = None
@@ -18,6 +24,8 @@ class SnapshotMetadata(BaseModel):
 
 
 class SourceMetric(StrEnum):
+    """Metric collected for a specific source."""
+
     DRUG_CLAIMS = "drug_claims"
     DRUG_CLAIM_ALIASES = "drug_claim_aliases"
     DRUG_CLAIM_ATTRIBUTES = "drug_claim_attributes"
@@ -34,12 +42,16 @@ class SourceMetric(StrEnum):
 
 
 class SourceMetricCount(BaseModel):
+    """Count for a source-specific metric."""
+
     source_name: str
     metric_name: SourceMetric
     count: int
 
 
 class GlobalMetric(StrEnum):
+    """Metric collected across the entire DGIdb dataset."""
+
     GENES = "genes"
     DRUGS = "drugs"
     INTERACTIONS = "interactions"
@@ -51,5 +63,7 @@ class GlobalMetric(StrEnum):
 
 
 class GlobalMetricCount(BaseModel):
+    """Count for a global metric."""
+
     metric_name: GlobalMetric
     count: int

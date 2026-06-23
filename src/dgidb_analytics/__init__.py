@@ -1,6 +1,6 @@
 """Short project description"""
 
-from importlib.metadata import version, PackageNotFoundError
+from importlib.metadata import PackageNotFoundError, version
 
 try:
     __version__ = version("dgidb_analytics")

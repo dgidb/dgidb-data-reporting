@@ -168,7 +168,7 @@ def report(analytics_db_path: Path, snapshot_name: str, show_unchanged: bool) ->
             ]
         )
 
-    print(
+    click.echo(
         tabulate(
             rows,
             headers=[
