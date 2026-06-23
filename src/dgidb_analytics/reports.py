@@ -10,16 +10,15 @@ from dgidb_analytics.db import (
     get_snapshot_by_name,
     get_snapshot_metrics,
 )
+from dgidb_analytics.schema import (  # noqa: TC001
+    GlobalMetric,
+    GlobalMetricCount,
+    SourceMetric,
+    SourceMetricCount,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
-
-    from dgidb_analytics.schema import (
-        GlobalMetric,
-        GlobalMetricCount,
-        SourceMetric,
-        SourceMetricCount,
-    )
 
 
 class MetricComparison(BaseModel):

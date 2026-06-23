@@ -1,4 +1,5 @@
 from enum import StrEnum
+from datetime import datetime
 
 from pydantic import BaseModel
 
@@ -11,6 +12,7 @@ class SnapshotStatus(StrEnum):
 class SnapshotMetadata(BaseModel):
     id: int | None = None
     name: str
+    created_at: datetime | None = None
     status: SnapshotStatus
     notes: str | None = None
 

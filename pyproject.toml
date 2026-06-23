@@ -21,6 +21,7 @@ dependencies = [
     "pydantic",
     "pydantic-settings",
     "psycopg",
+    "tabulate",
 ]
 dynamic = ["version"]
 
@@ -32,6 +33,7 @@ tests = [
 dev = [
     "prek>=0.2.23",
     "ruff==0.14.10",
+    "ipdb",
 ]
 
 [project.urls]
@@ -42,7 +44,7 @@ Source = "https://github.com/dgidb/dgidb_analytics"
 "Bug Tracker" = "https://github.com/dgidb/dgidb_analytics/issues"
 
 [project.scripts]
-dgidb-analytics = "dgidb_analytics.cli:cli"
+dgidb-report = "dgidb_analytics.cli:cli"
 
 [build-system]
 requires = ["setuptools>=77.0", "setuptools_scm>=8"]

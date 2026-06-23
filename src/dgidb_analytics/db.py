@@ -100,12 +100,28 @@ def create_snapshot(
 def get_snapshot_by_name(conn: sqlite3.Connection, name: str) -> SnapshotMetadata:
     """Get a snapshot ID"""
     row = conn.execute(
-        "SELECT id, name, status, notes FROM snapshots WHERE name = ?", (name,)
+        "SELECT id, name, status, created_at, notes FROM snapshots WHERE name = ?",
+        (name,),
     ).fetchone()
     if row is None:
         msg = f"No snapshots named '{name}' found"
         raise ValueError(msg)
-    return SnapshotMetadata(id=row[0], name=row[1], status=row[2], notes=row[3] or None)
+    return SnapshotMetadata(
+        id=row[0], name=row[1], status=row[2], created_at=row[3], notes=row[4]
+    )
+
+
+def get_all_snapshot_metadata(conn: sqlite3.Connection) -> list[SnapshotMetadata]:
+    """Get all snapshot info"""
+    cursor = conn.execute(
+        "SELECT id, name, status, created_at, notes FROM snapshots ORDER BY id;"
+    )
+    return [
+        SnapshotMetadata(
+            id=row[0], name=row[1], status=row[2], created_at=row[3], notes=row[4]
+        )
+        for row in cursor.fetchall()
+    ]
 
 
 def get_latest_released_snapshot(conn: sqlite3.Connection) -> SnapshotMetadata:
@@ -117,7 +133,7 @@ def get_latest_released_snapshot(conn: sqlite3.Connection) -> SnapshotMetadata:
     """
     row = conn.execute(
         """
-        SELECT id
+        SELECT id, name, status, created_at, notes
         FROM snapshots
         WHERE status = 'released'
         ORDER BY id DESC
@@ -129,7 +145,9 @@ def get_latest_released_snapshot(conn: sqlite3.Connection) -> SnapshotMetadata:
         msg = "No released snapshots found"
         raise ValueError(msg)
 
-    return row["id"]
+    return SnapshotMetadata(
+        id=row[0], name=row[1], status=row[2], created_at=row[3], notes=row[4]
+    )
 
 
 def update_snapshot_status(
@@ -210,6 +228,20 @@ def get_snapshot_metrics(
         (snapshot_id,),
     )
     global_counts = [
-        GlobalMetricCount(metric_name=s[1], count=s[2]) for s in cursor.fetchall()
+        GlobalMetricCount(metric_name=s[0], count=s[1]) for s in cursor.fetchall()
     ]
     return source_counts, global_counts
+
+
+def delete_snapshot(conn: sqlite3.Connection, snapshot_id: int) -> None:
+    """Delete a snapshot by ID"""
+    cursor = conn.execute(
+        "DELETE FROM snapshots WHERE id = ?",
+        (snapshot_id,),
+    )
+
+    if cursor.rowcount == 0:
+        msg = f"Snapshot {snapshot_id} not found"
+        raise ValueError(msg)
+
+    conn.commit()
