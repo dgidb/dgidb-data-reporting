@@ -143,5 +143,6 @@ pytest.ini
 .vim/
 *.swp
 
-# sqlite
+# data artifacts
 *.db
+*.csv
