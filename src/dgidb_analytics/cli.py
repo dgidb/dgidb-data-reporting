@@ -1,5 +1,6 @@
 """Provide CLI for application."""
 
+import csv
 from pathlib import Path
 from sqlite3 import connect
 
@@ -119,12 +120,29 @@ def delete_snapshot(analytics_db_path: Path, snapshot_name: str) -> None:
 )
 @click.argument("snapshot-name", type=str)
 @click.option("--show-unchanged", is_flag=True)
-def report(analytics_db_path: Path, snapshot_name: str, show_unchanged: bool) -> None:
+@click.option("--benchmark-name")
+@click.option(
+    "--output",
+    default=None,
+    type=click.Path(
+        path_type=Path, dir_okay=False, file_okay=True, writable=True, exists=False
+    ),
+)
+def report(
+    analytics_db_path: Path,
+    snapshot_name: str,
+    show_unchanged: bool,
+    benchmark_name: str | None = None,
+    output: Path | None = None,
+) -> None:
     """Run a report on a provisional snapshot against the most recent release snapshot."""
-    with connect(analytics_db_path) as conn:
-        previous_snapshot = db.get_latest_released_snapshot(conn)
-    click.echo(f"Latest release snapshot: {previous_snapshot.name}")
-    comparisons = check_provisional_snapshot(analytics_db_path, snapshot_name)
+    if not benchmark_name:
+        with connect(analytics_db_path) as conn:
+            previous_snapshot = db.get_latest_released_snapshot(conn)
+        click.echo(f"Latest release snapshot: {previous_snapshot.name}")
+    comparisons = check_provisional_snapshot(
+        analytics_db_path, snapshot_name, benchmark_name
+    )
 
     rows = []
 
@@ -184,3 +202,8 @@ def report(analytics_db_path: Path, snapshot_name: str, show_unchanged: bool) ->
             tablefmt="simple",
         )
     )
+
+    if output:
+        with output.open("w", newline="") as fp:
+            writer = csv.writer(fp)
+            writer.writerows(rows)

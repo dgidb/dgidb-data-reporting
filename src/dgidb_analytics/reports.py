@@ -97,14 +97,19 @@ def _compare_global_metrics(
 
 
 def check_provisional_snapshot(
-    analytics_db_path: Path, snapshot_name: str
+    analytics_db_path: Path,
+    snapshot_name: str,
+    benchmark_snapshot_name: str | None = None,
 ) -> list[MetricComparison]:
     """Compare a provisional snapshot against the most recent official release"""
     with sqlite3.connect(analytics_db_path) as connect:
         provisional_snapshot = get_snapshot_by_name(connect, snapshot_name)
         provisional_counts = get_snapshot_metrics(connect, provisional_snapshot.id)
-        previous_snapshot = get_latest_released_snapshot(connect)
-        previous_counts = get_snapshot_metrics(connect, previous_snapshot.id)
+        if not benchmark_snapshot_name:
+            benchmark_snapshot = get_latest_released_snapshot(connect)
+        else:
+            benchmark_snapshot = get_snapshot_by_name(connect, benchmark_snapshot_name)
+        benchmark_counts = get_snapshot_metrics(connect, benchmark_snapshot.id)
     return _compare_global_metrics(
-        provisional_counts[1], previous_counts[1]
-    ) + _compare_source_metrics(provisional_counts[0], previous_counts[0])
+        provisional_counts[1], benchmark_counts[1]
+    ) + _compare_source_metrics(provisional_counts[0], benchmark_counts[0])

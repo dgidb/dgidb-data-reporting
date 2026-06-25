@@ -64,6 +64,10 @@ def collect_global_counts(pg_conn: psycopg.Connection) -> list:
         GlobalMetric.DRUG_APPROVAL_RATINGS: t"SELECT COUNT(*) FROM drug_approval_ratings;",
         GlobalMetric.DRUG_APPLICATIONS: t"SELECT COUNT(*) FROM drug_applications;",
         GlobalMetric.PUBLICATIONS: t"SELECT COUNT(*) FROM publications;",
+        GlobalMetric.DRUG_CLAIMS: t"SELECT COUNT(*) FROM drug_claims;",
+        GlobalMetric.GENE_CLAIMS: t"SELECT COUNT(*) FROM gene_claims;",
+        GlobalMetric.INTERACTION_CLAIMS: t"SELECT COUNT(*) FROM interaction_claims;",
+        GlobalMetric.GENE_CATEGORY_CLAIMS: t"SELECT COUNT(*) FROM gene_claim_categories_gene_claims;",
     }
     counts = []
     for metric, query in queries.items():
@@ -111,20 +115,24 @@ def create_analytics_snapshot(
     """Collect analytics from Postgres and save them as a new snapshot."""
     with connect(analytics_db_path) as analytics_conn:
         create_schema(analytics_conn)
-        snapshot_id = create_snapshot(
-            analytics_conn,
-            SnapshotMetadata(name=snapshot_name, status=snapshot_status, notes=notes),
-        )
 
-        with psycopg.connect(postgres_dsn) as pg_conn:
-            global_counts = collect_global_counts(pg_conn)
-            source_counts = collect_source_counts(pg_conn)
+        with analytics_conn:
+            snapshot_id = create_snapshot(
+                analytics_conn,
+                SnapshotMetadata(
+                    name=snapshot_name, status=snapshot_status, notes=notes
+                ),
+            )
 
-        save_analytics(
-            analytics_conn,
-            snapshot_id=snapshot_id,
-            global_counts=global_counts,
-            source_counts=source_counts,
-        )
+            with psycopg.connect(postgres_dsn) as pg_conn:
+                global_counts = collect_global_counts(pg_conn)
+                source_counts = collect_source_counts(pg_conn)
+
+            save_analytics(
+                analytics_conn,
+                snapshot_id=snapshot_id,
+                global_counts=global_counts,
+                source_counts=source_counts,
+            )
 
     return snapshot_id

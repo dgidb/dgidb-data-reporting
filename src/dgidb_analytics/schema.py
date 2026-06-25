@@ -52,6 +52,10 @@ class SourceMetricCount(BaseModel):
 class GlobalMetric(StrEnum):
     """Metric collected across the entire DGIdb dataset."""
 
+    DRUG_CLAIMS = "drug_claims"
+    GENE_CLAIMS = "gene_claims"
+    INTERACTION_CLAIMS = "interaction_claims"
+    GENE_CATEGORY_CLAIMS = "gene_category_claims"
     GENES = "genes"
     DRUGS = "drugs"
     INTERACTIONS = "interactions"
