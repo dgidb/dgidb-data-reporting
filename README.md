@@ -19,8 +19,9 @@ Then ingest a candidate release:
 Finally, generate a report:
 
 ```console
-% dgidb-report dgidb_analytics.db '2026_06'
-Latest release snapshot: 2024_12
+% dgidb-report report dgidb_analytics.db '2026_06'
+Previous snapshot: 2024_12
+Current snapshot: 2026_06
 Status    Scope    Source               Metric                                        Previous    Current  Delta    % Change
 --------  -------  -------------------  ------------------------------------------  ----------  ---------  -------  ----------
 DROP      global   -                    drug_applications                                 9838       8815  -1023    -10.4%
@@ -32,6 +33,19 @@ GAIN      source   CKB-CORE             gene_claims                             
 GAIN      source   CKB-CORE             interaction_claim_attributes                     16558      16559  1        0.0%
 GAIN      source   CKB-CORE             interaction_claims                                2050       2051  1        0.0%
 ```
+
+Use `--benchmark-name` to select a specific previous snapshot and `--output report.csv`
+to also export the report as CSV. CSV exports begin with two `#` comment lines naming
+the snapshots, immediately followed by column headers and metric rows:
+
+```csv
+# Previous snapshot: 2024_12
+# Current snapshot: 2026_06
+Status,Scope,Source,Metric,Previous,Current,Delta,% Change
+```
+
+Configure your CSV reader to skip lines beginning with `#`. Carriage returns and
+newlines within snapshot names are displayed as literal `\r` and `\n` in these comments.
 
 ---
 
