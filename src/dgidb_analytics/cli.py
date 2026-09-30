@@ -139,10 +139,19 @@ def report(
     if not benchmark_name:
         with connect(analytics_db_path) as conn:
             previous_snapshot = db.get_latest_released_snapshot(conn)
-        click.echo(f"Latest release snapshot: {previous_snapshot.name}")
+        benchmark_name = previous_snapshot.name
     comparisons = check_provisional_snapshot(
         analytics_db_path, snapshot_name, benchmark_name
     )
+    snapshot_headers = [
+        f"Previous snapshot: {benchmark_name}",
+        f"Current snapshot: {snapshot_name}",
+    ]
+    snapshot_headers = [
+        header.replace("\r", "\\r").replace("\n", "\\n") for header in snapshot_headers
+    ]
+    for header in snapshot_headers:
+        click.echo(header)
 
     rows = []
 
@@ -186,24 +195,28 @@ def report(
             ]
         )
 
+    column_headers = [
+        "Status",
+        "Scope",
+        "Source",
+        "Metric",
+        "Previous",
+        "Current",
+        "Delta",
+        "% Change",
+    ]
     click.echo(
         tabulate(
             rows,
-            headers=[
-                "Status",
-                "Scope",
-                "Source",
-                "Metric",
-                "Previous",
-                "Current",
-                "Delta",
-                "% Change",
-            ],
+            headers=column_headers,
             tablefmt="simple",
         )
     )
 
     if output:
         with output.open("w", newline="") as fp:
+            for header in snapshot_headers:
+                fp.write(f"# {header}\n")
             writer = csv.writer(fp)
+            writer.writerow(column_headers)
             writer.writerows(rows)
